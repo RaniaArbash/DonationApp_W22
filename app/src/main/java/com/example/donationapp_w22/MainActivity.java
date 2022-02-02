@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     EditText donation_amout;
     Donation myDonation;
     AlertDialog.Builder builder;
+    DonationManager donationManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +39,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         donate_btn = findViewById(R.id.donate_btn);
 
         myDonation =  ((MyApp)getApplication()).mainDonation;
+        donationManager = ((MyApp)getApplication()).manager;
 
         Log.d("donation"," is sharing " +  String.valueOf(myDonation.isShared));
         Log.d("donation","payment method" + String.valueOf(myDonation.payment_method));
@@ -66,21 +68,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         int id = view.getId();
+       //String title =  ((Button)view).getText().toString();
         switch (id){
             case R.id.donate_btn:
                 if (validate()){
                     double amount = Double.parseDouble(donation_amout.getText().toString());
                     myDonation.amount = amount;
+                    donationManager.addDonation(myDonation);
                     //report();
                     // I need to open the Report Activity
                    // we need Intent Object
-
                     Intent myIntent = new Intent(this,Report.class);// messaging object
                     myIntent.putExtra("Name","Donation App");
                     myIntent.putExtra("year",2022);
                     myIntent.putExtra("month",1);
 
+                    myIntent.putExtra("currentDonationObj",myDonation);
                     startActivity(myIntent);
+
+
+
+                    ((MyApp)getApplication()).mainDonation = new Donation();
 
                 }else {
                     builder.setTitle("Error!!!");
