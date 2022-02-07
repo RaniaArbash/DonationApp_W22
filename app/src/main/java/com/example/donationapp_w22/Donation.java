@@ -17,6 +17,11 @@ public class Donation implements Parcelable {
     public Donation() {
     }
 
+    public String getPaymentMethod(){
+        return  (payment_method == 1)? "PayPal" : "Credit Card";
+
+    }
+
     protected Donation(Parcel in) {
         amount = in.readDouble();
         payment_method = in.readInt();

@@ -1,11 +1,15 @@
 package com.example.donationapp_w22;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -51,6 +55,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.donation_menu,menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+         super.onOptionsItemSelected(item);
+         switch (item.getItemId()){
+             case R.id.alldonations:
+                 Intent baseActivityIntent = new Intent(this,BaseAdapterReportActivity.class);
+                 startActivity(baseActivityIntent);
+
+                 break;
+             case R.id.exit:
+                 break;
+         }
+         return true;
+
+    }
 
     public boolean validate(){
         boolean valid = false;
