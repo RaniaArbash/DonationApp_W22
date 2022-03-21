@@ -2,7 +2,9 @@ package com.example.donationapp_w22;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Application;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -10,7 +12,13 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity
+        implements View.OnClickListener,
+        DatabaseManager.DatabaseListener
+
+{
 
     Button donate_btn;
     RadioButton paypal;
@@ -19,11 +27,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     CheckBox sharing_checkbox;
     EditText donation_amout;
     Donation myDonation;
-
+    DatabaseManager dbManager;
+    DonationDataBase donationDataBase;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        dbManager = ((MyApp)getApplication()).dbManager;
+        donationDataBase = dbManager.getDb(this);
 
         paypal = findViewById(R.id.paypal);
         credicCard = findViewById(R.id.credit_card);
@@ -63,6 +74,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (validate()){
                     double amount = Double.parseDouble(donation_amout.getText().toString());
                     myDonation.amount = amount;
+                    //save the new donation in Room DB.
+                    dbManager.listener = this;
+                    dbManager.saveNewDonation(myDonation);
+
                     report();
                 }
                 break;
@@ -76,5 +91,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 myDonation.payment_method = 0;
                 break;
         }
+    }
+
+    @Override
+    public void onListReady(List<Donation> list) {
+        Log.d("list" , list.size() + "");
+    }
+
+    @Override
+    public void onAddDone() {
+        dbManager.getAllDonations();
     }
 }
