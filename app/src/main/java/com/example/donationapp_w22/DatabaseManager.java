@@ -17,6 +17,7 @@ public class DatabaseManager {
     interface DatabaseListener {
         void onListReady (List<Donation> list);
         void onAddDone();
+        void onDeleteDone();
     }
 
     DatabaseListener listener;
@@ -44,7 +45,6 @@ public class DatabaseManager {
             @Override
             public void run() {
                 db.donationDao().addNewDonationToDB(newDonation);
-
                 mainThread_Handler.post(new Runnable() {
                     @Override
                     public void run() {
@@ -65,6 +65,38 @@ public class DatabaseManager {
                     @Override
                     public void run() {
                         listener.onListReady(list);
+                    }
+                });
+            }
+        });
+
+    }
+
+    public void getAllDonationsBiggerThan(double value){
+        databaseExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                List<Donation> list =  db.donationDao().getAllDonationsMoreThan(value);
+                mainThread_Handler.post(new Runnable() { // go to main thread
+                    @Override
+                    public void run() {
+                        listener.onListReady(list);
+                    }
+                });
+            }
+        });
+
+    }
+
+    public void deleteDonation(Donation todelete){
+        databaseExecutor.execute(new Runnable() {
+            @Override
+            public void run() {
+                db.donationDao().deleteDonation(todelete);
+                mainThread_Handler.post(new Runnable() { // go to main thread
+                    @Override
+                    public void run() {
+                        listener.onDeleteDone();
                     }
                 });
             }

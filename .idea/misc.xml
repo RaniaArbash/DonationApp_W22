@@ -9,6 +9,8 @@
         <entry key="app/src/main/res/layout/base_adapter_row_layout.xml" value="0.165" />
         <entry key="app/src/main/res/layout/item_row_layout.xml" value="0.2222222222222222" />
         <entry key="app/src/main/res/menu/donation_menu.xml" value="0.25" />
+        <entry key="app/src/main/res/menu/menu.xml" value="0.10677083333333333" />
+        <entry key="app/src/main/res/menu/search_menu.xml" value="0.21839080459770116" />
       </map>
     </option>
   </component>

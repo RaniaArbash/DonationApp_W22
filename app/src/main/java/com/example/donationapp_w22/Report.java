@@ -1,64 +1,96 @@
 package com.example.donationapp_w22;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.SearchView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.List;
 
-public class Report extends AppCompatActivity {
-TextView reportTV;
+public class Report extends AppCompatActivity
+        implements
+        DatabaseManager.DatabaseListener{
+
 ListView listOfDonations;
 
-Spinner collegeSpinner;
+DonationBaseAdapter adapter;
+DatabaseManager dbManager;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
-        int year = getIntent().getExtras().getInt("year");
-        String valueFromFA =  getIntent().getExtras().getString("Name");
-
-        Donation objectFromMainActivity = getIntent().getExtras().getParcelable("currentDonationObj");
-
-        if (getIntent().hasExtra("month")){
-            Log.d("Second Activity", String.valueOf(year));
-            Log.d("Second Activity", valueFromFA);
-            Log.d("Second Activity", String.valueOf(getIntent().getExtras().getInt("month")));
-        }
-
-        //Donation mainDonationObj = ((MyApp)getApplication()).mainDonation;
-        reportTV = findViewById(R.id.reportText);
         listOfDonations = findViewById(R.id.donationList);
+         DonationManager manager = ((MyApp)getApplication()).manager;
+         dbManager = ((MyApp)getApplication()).dbManager;
+        dbManager.listener = this;
+        adapter = new DonationBaseAdapter(manager.allDonations,this);
+        listOfDonations.setAdapter(adapter);
+        listOfDonations.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                dbManager.deleteDonation((Donation) manager.allDonations.get(i));
+            }
+        });
+    }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search_menu, menu);
 
-        String[] colores = new String[] {"Red","Green","Black"};
-        String[] colleges = new String[] {"Seneca","Humber","Niagra College"};
+        MenuItem searchViewMenuItem = menu.findItem(R.id.search);
 
+        SearchView searchView = (SearchView) searchViewMenuItem.getActionView();
+        String searchFor = searchView.getQuery().toString();
 
-        DonationManager manager = ((MyApp)getApplication()).manager;
-        int size = manager.allDonations.size();
-        String[] allDonationsArray = new String[size];
-        for (int i = 0 ;i< size ;i ++){
-            allDonationsArray[i] = manager.allDonations.get(i).toString();
+        if (!searchFor.isEmpty()) {// toronto
+            searchView.setIconified(false);
+            searchView.setQuery(searchFor, false);
         }
 
 
-        ArrayAdapter adapter = new ArrayAdapter(this,R.layout.item_row_layout,R.id.donation_row,allDonationsArray);
-        listOfDonations.setAdapter(adapter);
+        searchView.setQueryHint("Search for donation more that .... ");
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
 
+                dbManager.getAllDonationsBiggerThan(Double.parseDouble(query));
+                return true;
+            }
 
-       ArrayAdapter spinnerAdapter = new ArrayAdapter(this,R.layout.item_row_layout,R.id.donation_row,colleges);
-        collegeSpinner = findViewById(R.id.college_spinner);
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                return false;
+            }
+        });
+        return true;
+    }
 
-        collegeSpinner.setAdapter(spinnerAdapter);
+    @Override
+    public void onListReady(List<Donation> list) {
+        adapter.listOfDonations = new ArrayList<>(list);
+        adapter.notifyDataSetChanged();
 
+    }
 
-        reportTV.setText(objectFromMainActivity.getDonationReport());
+    @Override
+    public void onAddDone() {
 
+    }
+
+    @Override
+    public void onDeleteDone() {
+        dbManager.getAllDonations();
     }
 }

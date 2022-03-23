@@ -3,4 +3,5 @@
 <item android:id="@+id/alldonations"
     android:title="@string/list_of_donations"/>
     <item android:id="@+id/exit" android:title="Close the app"/>
+
 </menu>

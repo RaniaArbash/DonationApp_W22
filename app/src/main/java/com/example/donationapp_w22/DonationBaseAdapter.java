@@ -40,10 +40,11 @@ Context context;
 
        TextView amountText = view.findViewById(R.id.list_amount);
        TextView paymentMethodText = view.findViewById(R.id.list_pmethod);
-     //   ImageView img = view.findViewById(R.id.donation_img);
+        String method;
+        method = (listOfDonations.get(i).payment_method == 1)? "PayPal" : "Credit Card";
 
-       amountText.setText(String.valueOf(listOfDonations.get(i).amount));
-       paymentMethodText.setText(listOfDonations.get(i).getPaymentMethod());
+        amountText.setText(String.valueOf(listOfDonations.get(i).amount));
+       paymentMethodText.setText(method);
 
       // img.setImageResource(R.drawable.img);
         return view;

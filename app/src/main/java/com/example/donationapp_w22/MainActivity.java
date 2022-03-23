@@ -1,8 +1,14 @@
 package com.example.donationapp_w22;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -10,7 +16,12 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener{
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends AppCompatActivity
+        implements View.OnClickListener,
+        DatabaseManager.DatabaseListener{
 
     Button donate_btn;
     RadioButton paypal;
@@ -19,6 +30,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     CheckBox sharing_checkbox;
     EditText donation_amout;
     Donation myDonation;
+    DonationManager donationManager;
+    DatabaseManager dbManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +39,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         paypal = findViewById(R.id.paypal);
+        dbManager = ((MyApp)getApplication()).dbManager;
+        donationManager = ((MyApp)getApplication()).manager;
+
+        dbManager.getDb(this);
+        dbManager.listener = this;
+        dbManager.getAllDonations();
+
         credicCard = findViewById(R.id.credit_card);
         sharing_checkbox = findViewById(R.id.sharing_checkbox);
         donation_amout = findViewById(R.id.donation_amount);
@@ -39,8 +59,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     }
 
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.donation_menu, menu);
+        return true;
+    }
 
-    public boolean validate(){
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        super.onOptionsItemSelected(item);
+        switch (item.getItemId()) {
+            case R.id.alldonations:{
+                Intent intent = new Intent(this,Report.class);
+                startActivity(intent);
+                break;
+            }
+        }
+        return true;
+    }
+            public boolean validate(){
         boolean valid = false;
         if (paypal.isChecked() || credicCard.isChecked()){ // validate payment method
             if (!donation_amout.getText().toString().isEmpty()) // validate the amount
@@ -63,6 +100,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 if (validate()){
                     double amount = Double.parseDouble(donation_amout.getText().toString());
                     myDonation.amount = amount;
+                    dbManager.saveNewDonation(myDonation);
                     report();
                 }
                 break;
@@ -76,5 +114,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 myDonation.payment_method = 0;
                 break;
         }
+    }
+
+    @Override
+    public void onListReady(List<Donation> list) {
+        ArrayList< Donation> dblist = (ArrayList<Donation>) list;
+        donationManager.allDonations = dblist;
+    }
+
+    @Override
+    public void onAddDone() {
+        dbManager.getAllDonations();
+
+    }
+
+    @Override
+    public void onDeleteDone() {
+
     }
 }
